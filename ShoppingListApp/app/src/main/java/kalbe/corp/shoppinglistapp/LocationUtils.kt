@@ -1,4 +1,4 @@
-package kalbe.corp.locationapp.utils
+package kalbe.corp.shoppinglistapp
 
 import android.Manifest.permission
 import android.annotation.SuppressLint
@@ -15,8 +15,6 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
-import kalbe.corp.locationapp.LocationData
-import kalbe.corp.locationapp.LocationViewModel
 import java.util.Locale
 
 class LocationUtils(
