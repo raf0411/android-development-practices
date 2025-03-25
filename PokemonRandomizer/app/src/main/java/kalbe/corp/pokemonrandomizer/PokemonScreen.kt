@@ -33,7 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 
 @Composable
-fun PokemonScreen(){
+fun PokemonScreen() {
     val pokemonViewModel: MainViewModel = viewModel()
     val viewState by pokemonViewModel.pokemonListsState
     val pokemonViewState by pokemonViewModel.singlePokemonState
@@ -45,31 +45,35 @@ fun PokemonScreen(){
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box{
-            when{
+        Box {
+            when {
                 pokemonViewState.loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+
                 pokemonViewState.error != null -> {
                     Text("ERROR OCCURRED!", modifier = Modifier.align(Alignment.Center))
                 }
+
                 else -> {
                     pokemonViewState.pokemon?.let {
                         RandomizedPokemonScreen(
                             singlePokemon = it,
-                            onRandomizeClick = {pokemonViewModel.randomizePokemon()})
+                            onRandomizeClick = { pokemonViewModel.randomizePokemon() })
                     }
                 }
             }
         }
-        Box{
-            when{
+        Box {
+            when {
                 viewState.loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+
                 viewState.error != null -> {
                     Text("ERROR OCCURRED!", modifier = Modifier.align(Alignment.Center))
                 }
+
                 else -> {
                     Column(
                         verticalArrangement = Arrangement.Center,
@@ -88,10 +92,9 @@ fun PokemonScreen(){
 fun RandomizedPokemonScreen(
     singlePokemon: SinglePokemonResponse,
     onRandomizeClick: () -> Unit,
-){
+) {
     Box(
-        modifier = Modifier
-            .wrapContentSize(Alignment.Center),
+        modifier = Modifier.wrapContentSize(Alignment.Center),
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
@@ -113,28 +116,26 @@ fun RandomizedPokemonScreen(
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Weight: ${singlePokemon.weight}")
             Spacer(modifier = Modifier.height(24.dp))
-            Button(onClick = {onRandomizeClick()}) { Text("Randomize") }
+            Button(onClick = { onRandomizeClick() }) { Text("Randomize") }
         }
     }
 }
 
 @Composable
-fun PokemonListScreen(pokemonLists: List<Pokemon>, pokemonViewModel: MainViewModel){
+fun PokemonListScreen(pokemonLists: List<Pokemon>, pokemonViewModel: MainViewModel) {
     Row {
-        LazyVerticalGrid(GridCells.Fixed(2), modifier = Modifier.fillMaxSize()){
-            items(pokemonLists){
-                    pokemon ->
+        LazyVerticalGrid(GridCells.Fixed(2), modifier = Modifier.fillMaxSize()) {
+            items(pokemonLists) { pokemon ->
                 val id = pokemon.url.trimEnd('/').split("/").last().toIntOrNull() ?: 0
                 pokemonViewModel.getPokemonSprites(id)
                     ?.let { PokemonItem(pokemon = pokemon, sprites = it) }
             }
         }
     }
-
 }
 
 @Composable
-fun PokemonItem(pokemon: Pokemon, sprites: Sprites){
+fun PokemonItem(pokemon: Pokemon, sprites: Sprites) {
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -146,8 +147,7 @@ fun PokemonItem(pokemon: Pokemon, sprites: Sprites){
         Image(
             painter = rememberAsyncImagePainter(sprites.front_default),
             contentDescription = "pokemon sprite",
-            modifier = Modifier
-                .aspectRatio(1f)
+            modifier = Modifier.aspectRatio(1f)
         )
         Text(
             text = pokemon.name.capitalize(),

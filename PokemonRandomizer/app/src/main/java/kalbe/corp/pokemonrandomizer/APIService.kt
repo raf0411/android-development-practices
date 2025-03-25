@@ -12,7 +12,7 @@ private val retrofit = Retrofit.Builder().baseUrl(BASE_URL)
     .addConverterFactory(GsonConverterFactory.create())
     .build()
 
-val pokemonService = retrofit.create(APIService::class.java)
+val pokemonService: APIService = retrofit.create(APIService::class.java)
 
 interface APIService{
     @GET("pokemon?limit=$LIMIT/")

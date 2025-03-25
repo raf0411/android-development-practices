@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardOptions
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Button
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.OutlinedTextField
@@ -17,9 +18,16 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.TextFieldDefaults
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,8 +38,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import kalbe.corp.wishlistapp.data.Wish
+import kotlinx.coroutines.launch
 
 @SuppressLint("ResourceType")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,10 +50,24 @@ fun AddEditDetailView(
     viewModel: WishViewModel,
     navController: NavController,
 ) {
+    val snackMessage = remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    val scaffoldState = rememberScaffoldState()
+
+    if(id != 0L){
+        val wish = viewModel.getWishById(id).collectAsState(initial = Wish(0L, "", ""))
+        viewModel.wishTitleState = wish.value.title
+        viewModel.wishDescriptionState = wish.value.description
+    } else{
+        viewModel.wishTitleState = ""
+        viewModel.wishDescriptionState = ""
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 50.dp),
+        scaffoldState = scaffoldState,
         topBar = {
             TopBarView(
                 title = if (id != 0L) stringResource(id = R.string.update_wish) else stringResource(
@@ -83,11 +106,32 @@ fun AddEditDetailView(
             Button(
                 onClick = {
                     if (viewModel.wishTitleState.isNotEmpty() && viewModel.wishDescriptionState.isNotEmpty()) {
-                        // TODO UpdateWish
+                        if (id != 0L){
+                            // TODO UpdateWish
+                            viewModel.editWish(Wish(
+                                id = id,
+                                title = viewModel.wishTitleState.trim(),
+                                description = viewModel.wishDescriptionState.trim(),
+                            ))
+                        } else{
+                            // TODO AddWish
+                            viewModel.createWish(
+                                Wish(
+                                    title = viewModel.wishTitleState.trim(),
+                                    description = viewModel.wishDescriptionState.trim(),
+                                )
+                            )
 
+                            snackMessage.value = "Wish has been created!"
+                        }
                     } else {
-                        // TODO AddWish
+                        // Enter fields for wish to be created
+                        snackMessage.value = "Enter fields to create a wish"
+                    }
 
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(snackMessage.value)
+                        navController.navigateUp()
                     }
                 }) {
                 Text(
@@ -109,7 +153,9 @@ fun WishTextField(
         value = value,
         onValueChange = onValueChanged,
         label = { Text(text = label, color = Color.Black) },
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = Color.Black,
